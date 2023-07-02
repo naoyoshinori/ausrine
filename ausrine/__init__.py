@@ -138,21 +138,29 @@ class Ausrine:
             WebElement: Returns the elements found. If the element is not found,
             return None.
         """
+        element = None
+        error = None
         result = None
+
         timeout = time.time() + time_to_wait
+        short_time = time_to_wait / 5.0
+
         while True:
-            is_timeout = time.time() <= timeout
-            self.webdriver.implicitly_wait(time_to_wait)
-            element = self.webdriver.find_element(by, value)
-            if element.is_enabled():
+            try:
+                self.webdriver.implicitly_wait(short_time)
+                element = self.webdriver.find_element(by, value)
+            except Exception as e:
+                error = e
+
+            if (element) and (element.is_enabled()):
                 result = element
                 break
-            elif is_timeout:
-                logger.warning("timeout")
-                break
+            elif time.time() >= timeout:
+                logger.error("timeout")
+                raise error
             else:
-                time.sleep(0.01)
-                continue
+                time.sleep(0.1)
+
         return result
 
     def click(self, by: str, value: str, time_to_wait: float = 10.0) -> None:
