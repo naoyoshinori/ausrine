@@ -7,22 +7,51 @@ from selenium.webdriver.remote.webelement import WebElement
 
 logger = getLogger(__name__)
 
+def _url_remove_suffix(url: str) -> str:
+    tail_index = len(url) - 1
+    rfind_index = url.rfind("/")
+
+    if tail_index == rfind_index:
+        url = url.removesuffix("/")
+
+    return url
+
 
 class Ausrine:
     def __init__(self, webdriver: WebDriver) -> None:
         self.webdriver = webdriver
 
-    def get(self, url: str, time_to_wait: float = 10.0):
+    def get(self, url: str, url_match: bool = True, time_to_wait: float = 10.0):
         """Loads a web page in the current browser session.
 
         Args:
             url (str): URL.
+            url_match (bool, optional): If set to True, check if the URL matches.
             time_to_wait (float, optional): Amount of time to wait (in seconds).
             Defaults to 10.0.
         """
         logger.debug("get - %s", url)
-        self.webdriver.implicitly_wait(time_to_wait)
-        self.webdriver.get(url)
+
+        get_url = _url_remove_suffix(url)
+
+        timeout = time.time() + time_to_wait
+
+        while url_match:
+            self.webdriver.get(url)
+
+            current_url = _url_remove_suffix(self.webdriver.current_url)
+
+            if current_url == get_url:
+                break
+            elif time.time() >= timeout:
+                logger.error("timeout")
+                raise TimeoutError("timeout")
+            else:
+                logger.warn("get - no match - %s", current_url)
+                time.sleep(0.1)
+
+        else:
+            self.webdriver.get(url)
 
     def wait_until_find_element(
         self, by: str, value: str, time_to_wait: float = 10.0
@@ -147,7 +176,11 @@ class Ausrine:
             for k, v in seq.items():
                 match k.lower():
                     case "get":
-                        self.get(url=v["url"])
+                        if "url_match" in v.keys():
+                            url_match = v["url_match"]
+                        else:
+                            url_match = True
+                        self.get(url=v["url"], url_match=url_match)
                     case "click":
                         self.click(by=v["by"], value=v["value"])
                     case "submit":
