@@ -16,9 +16,10 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
 ausrine = Ausrine(webdriver)
-ausrine.get("https://www.google.com")
+ausrine.get("https://www.google.com/?hl=en")
 ausrine.click(by=By.XPATH, value="//textarea[@title='Search']")
 ausrine.send_keys(by=By.XPATH, value="//textarea[@title='Search']", text="iphone")
+ausrine.send_keys(by=By.XPATH, value="//textarea[@title='Search']", text=" 14", append=True)
 ausrine.send_keys(by=By.XPATH, value="//textarea[@title='Search']", text=Keys.ENTER)
 ```
 
@@ -28,9 +29,10 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
 sequences = [
-    {"get": {"url": "https://www.google.com"}},
+    {"get": {"url": "https://www.google.com/?hl=en"}},
     {"click": {"by": By.XPATH, "value": "//textarea[@title='Search']"}},
     {"send_keys": {"by": By.XPATH, "value": "//textarea[@title='Search']", "text": "iphone"}},
+    {"send_keys": {"by": By.XPATH, "value": "//textarea[@title='Search']", "text": " 14", "append": True}},
     {"send_keys": {"by": By.XPATH, "value": "//textarea[@title='Search']", "text": Keys.ENTER}},
 ]
 
