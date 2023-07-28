@@ -286,7 +286,7 @@ class Ausrine:
                         )
                     case _:
                         logger.error("No method named '%s'.", k)
-        
+
     def try_execute(self, sequences: list[dict]) -> Exception:
         error = None
 
