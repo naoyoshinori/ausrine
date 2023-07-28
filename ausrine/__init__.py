@@ -91,20 +91,20 @@ class Ausrine:
     def __init__(self, webdriver: WebDriver) -> None:
         self.webdriver = webdriver
 
-    def get(self, url: str, url_match: bool = True, time_to_wait: float = 10.0):
+    def get(self, url: str, url_match: bool = True, timeout: float = 10.0):
         """Loads a web page in the current browser session.
 
         Args:
             url (str): URL.
             url_match (bool, optional): If set to True, check if the URL matches.
-            time_to_wait (float, optional): Amount of time to wait (in seconds).
+            timeout (float, optional): Amount of time to wait (in seconds).
             Defaults to 10.0.
         """
         logger.debug("get - %s", url)
 
         get_url = _url_remove_suffix(url)
 
-        timeout = time.time() + time_to_wait
+        time_over = time.time() + timeout
 
         while url_match:
             self.webdriver.get(url)
@@ -113,7 +113,7 @@ class Ausrine:
 
             if current_url == get_url:
                 break
-            elif time.time() >= timeout:
+            elif time.time() >= time_over:
                 logger.error("timeout")
                 raise TimeoutError("timeout")
             else:
@@ -124,14 +124,14 @@ class Ausrine:
             self.webdriver.get(url)
 
     def wait_until_find_element(
-        self, by: str, value: str, time_to_wait: float = 10.0
+        self, by: str, value: str, timeout: float = 10.0
     ) -> WebElement:
         """Find an element given a By strategy and locator.
 
         Args:
             by (str): By strategy.
             value (str): Locator.
-            time_to_wait (float, optional): Amount of time to wait (in seconds).
+            timeout (float, optional): Amount of time to wait (in seconds).
             Defaults to 10.0.
 
         Returns:
@@ -142,8 +142,8 @@ class Ausrine:
         error = None
         result = None
 
-        timeout = time.time() + time_to_wait
-        short_time = time_to_wait / 5.0
+        time_over = time.time() + timeout
+        short_time = timeout / 5.0
 
         while True:
             try:
@@ -155,7 +155,7 @@ class Ausrine:
             if (element) and (element.is_enabled()):
                 result = element
                 break
-            elif time.time() >= timeout:
+            elif time.time() >= time_over:
                 logger.error("timeout")
                 raise error
             else:
@@ -163,47 +163,47 @@ class Ausrine:
 
         return result
 
-    def click(self, by: str, value: str, time_to_wait: float = 10.0) -> None:
+    def click(self, by: str, value: str, timeout: float = 10.0) -> None:
         """Find an element given a By strategy and locator. Then clicks the element.
 
         Args:
             by (str): By strategy.
             value (str): Locator.
-            time_to_wait (float, optional): Amount of time to wait (in seconds).
+            timeout (float, optional): Amount of time to wait (in seconds).
             Defaults to 10.0.
         """
-        e = self.wait_until_find_element(by, value, time_to_wait)
+        e = self.wait_until_find_element(by, value, timeout)
         if e:
             html = e.get_attribute("outerHTML")
             logger.debug("click - %s", html)
             e.click()
 
-    def submit(self, by: str, value: str, time_to_wait: float = 10.0) -> None:
+    def submit(self, by: str, value: str, timeout: float = 10.0) -> None:
         """Find an element given a By strategy and locator. Then Submits a form.
 
         Args:
             by (str): By strategy.
             value (str): Locator.
-            time_to_wait (float, optional): Amount of time to wait (in seconds).
+            timeout (float, optional): Amount of time to wait (in seconds).
             Defaults to 10.0.
         """
-        e = self.wait_until_find_element(by, value, time_to_wait)
+        e = self.wait_until_find_element(by, value, timeout)
         if e:
             html = e.get_attribute("outerHTML")
             logger.debug("submit - %s", html)
             e.submit()
 
-    def clear(self, by: str, value: str, time_to_wait: float = 10.0) -> None:
+    def clear(self, by: str, value: str, timeout: float = 10.0) -> None:
         """Find an element given a By strategy and locator.
         Then Clears the text if it's a text entry element.
 
         Args:
             by (str): By strategy.
             value (str): Locator.
-            time_to_wait (float, optional): Amount of time to wait (in seconds).
+            timeout (float, optional): Amount of time to wait (in seconds).
             Defaults to 10.0.
         """
-        e = self.wait_until_find_element(by, value, time_to_wait)
+        e = self.wait_until_find_element(by, value, timeout)
         if e:
             html = e.get_attribute("outerHTML")
             logger.debug("clear - %s", html)
@@ -215,7 +215,7 @@ class Ausrine:
         value: str,
         text: str,
         append: bool = False,
-        time_to_wait: float = 10.0,
+        timeout: float = 10.0,
     ) -> None:
         """Find an element given a By strategy and locator.
         Then Simulates typing into the element.
@@ -225,10 +225,10 @@ class Ausrine:
             value (str): Locator.
             text (str): A string for typing, or setting form fields.
             append (bool, optional): If set to True, text is appended to the textbox.
-            time_to_wait (float, optional): Amount of time to wait (in seconds).
+            timeout (float, optional): Amount of time to wait (in seconds).
             Defaults to 10.0.
         """
-        e = self.wait_until_find_element(by, value, time_to_wait)
+        e = self.wait_until_find_element(by, value, timeout)
         if e:
             html = e.get_attribute("outerHTML")
             logger.debug("send_keys - %s", html)
@@ -286,3 +286,13 @@ class Ausrine:
                         )
                     case _:
                         logger.error("No method named '%s'.", k)
+        
+    def try_execute(self, sequences: list[dict]) -> Exception:
+        error = None
+
+        try:
+            self.execute(sequences)
+        except Exception as e:
+            error = Exception
+
+        return error
