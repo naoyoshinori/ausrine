@@ -293,6 +293,6 @@ class Ausrine:
         try:
             self.execute(sequences)
         except Exception as e:
-            error = Exception
+            error = e
 
         return error
