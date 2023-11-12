@@ -1,6 +1,5 @@
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service as ChromeService
-from webdriver_manager.chrome import ChromeDriverManager
+from typing import Callable
 
 
 def setup_webdriver(
@@ -9,6 +8,7 @@ def setup_webdriver(
     download_dir: str = None,
     window_position: str = "0,0",
     window_size: str = "1280,720",
+    func_options: Callable[[webdriver.ChromeOptions], None] = None,
 ) -> webdriver.Chrome:
     """Setup webdriver.
 
@@ -20,6 +20,7 @@ def setup_webdriver(
         Defaults to "0,0".
         window_size (str, optional): Sets the size of the browser window.
         Defaults to "1280,720".
+        func_options (func, optional): The argument is a function that processes the option.
 
     Returns:
         webdriver.Chrome: selenium webdriver
@@ -43,5 +44,8 @@ def setup_webdriver(
         prefs = {"download.default_directory": download_dir}
         options.add_experimental_option("prefs", prefs)
 
-    service = ChromeService(ChromeDriverManager().install())
+    if func_options:
+        func_options(options)
+
+    service = webdriver.ChromeService()
     return webdriver.Chrome(service=service, options=options)
