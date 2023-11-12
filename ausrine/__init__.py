@@ -124,7 +124,7 @@ class Ausrine:
             self.webdriver.get(url)
 
     def wait_until_find_element(
-        self, by: str, value: str, timeout: float = 10.0
+        self, by: str, value: str, timeout: float = 10.0, wait: float = None
     ) -> WebElement:
         """Find an element given a By strategy and locator.
 
@@ -141,6 +141,9 @@ class Ausrine:
         element = None
         error = None
         result = None
+
+        if wait:
+            time.sleep(wait)
 
         time_over = time.time() + timeout
         short_time = timeout / 5.0
@@ -216,6 +219,7 @@ class Ausrine:
         text: str,
         append: bool = False,
         timeout: float = 10.0,
+        wait: float = None
     ) -> None:
         """Find an element given a By strategy and locator.
         Then Simulates typing into the element.
@@ -228,7 +232,7 @@ class Ausrine:
             timeout (float, optional): Amount of time to wait (in seconds).
             Defaults to 10.0.
         """
-        e = self.wait_until_find_element(by, value, timeout)
+        e = self.wait_until_find_element(by, value, timeout, wait)
         if e:
             html = e.get_attribute("outerHTML")
             logger.debug("send_keys - %s", html)
@@ -281,8 +285,12 @@ class Ausrine:
                             append = v["append"]
                         else:
                             append = False
+                        if "wait" in v.keys():
+                            wait = v["wait"]
+                        else:
+                            wait = None
                         self.send_keys(
-                            by=v["by"], value=v["value"], text=v["text"], append=append
+                            by=v["by"], value=v["value"], text=v["text"], append=append, wait=wait
                         )
                     case _:
                         logger.error("No method named '%s'.", k)
