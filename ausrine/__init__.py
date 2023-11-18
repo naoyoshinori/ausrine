@@ -91,6 +91,16 @@ class Ausrine:
     def __init__(self, webdriver: WebDriver) -> None:
         self.webdriver = webdriver
 
+    def quit(self):
+        """Quits the driver and closes every associated window.
+
+        :Usage:
+            ::
+
+                ausrine.quit()
+        """
+        self.webdriver.quit()
+
     def get(self, url: str, url_match: bool = True, timeout: float = 10.0):
         """Loads a web page in the current browser session.
 
