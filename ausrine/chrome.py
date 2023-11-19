@@ -38,15 +38,14 @@ def setup_webdriver(
     if user_data_dir:
         user_data_dir = os.path.abspath(user_data_dir)
         options.add_argument(f"--user-data-dir={user_data_dir}")
-        logger.debug("user-data-dir: %s", user_data_dir)
+        logger.info("user-data-dir: %s", user_data_dir)
 
     if profile_dir:
         options.add_argument(f"--profile-directory={profile_dir}")
-        logger.debug("profile-directory: %s", profile_dir)
+        logger.info("profile-directory: %s", profile_dir)
 
     if headless:
         options.add_argument("--headless=new")
-        logger.debug("headless: %s", True)
 
     if window_position:
         options.add_argument(f"--window-position={window_position}")
@@ -58,7 +57,7 @@ def setup_webdriver(
         download_dir = os.path.abspath(download_dir)
         prefs = {"download.default_directory": download_dir}
         options.add_experimental_option("prefs", prefs)
-        logger.debug("download-directory: %s", download_dir)
+        logger.info("download-directory: %s", download_dir)
 
     if func_options:
         func_options(options)
